@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Symptom Assistant - SwasthR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'orbitron': ['Orbitron', 'sans-serif'],
+                        'rajdhani': ['Rajdhani', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            light: '#5ad6d7',
+                            DEFAULT: '#48c9ca',
+                            dark: '#3ab5b6',
+                        },
+                        secondary: {
+                            light: '#082d48',
+                            DEFAULT: '#061f33',
+                            dark: '#041625',
+                        },
+                        accent: {
+                            light: '#ff7e5f',
+                            DEFAULT: '#ff6b4a',
+                            dark: '#e65a3b',
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .logo-text {
+            background: linear-gradient(45deg, #5ad6d7, #48c9ca, #3ab5b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chat-container {
+            height: calc(100vh - 200px);
+        }
+        .message-entering {
+            animation: messageEnter 0.3s ease-out;
+        }
+        @keyframes messageEnter {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #48c9ca;
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body class="font-rajdhani bg-gray-50 text-gray-800">
+    <!-- Header -->
+    <header class="fixed w-full bg-white shadow-md z-50">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="flex items-center">
+                    <img src="https://i.ibb.co/NgsgXB8d/Chat-GPT-Image-Jun-13-2025-03-48-11-PM.png" alt="SwasthR Logo" class="h-10 w-10 object-contain">
+                    <span class="text-2xl font-bold ml-2">
+                        <span class="logo-text font-orbitron">SwasthR</span>
+                    </span>
+                </a>
+            </div>
+
+            <nav class="hidden md:flex space-x-8">
+                <a href="index.html" class="font-semibold text-secondary hover:text-primary transition-colors duration-300">Home</a>
+                <a href="scan.html" class="font-semibold text-secondary hover:text-primary transition-colors duration-300">Medicine Scan</a>
+                <a href="prescription.html" class="font-semibold text-secondary hover:text-primary transition-colors duration-300">Prescriptions</a>
+                <a href="connect.html" class="font-semibold text-secondary hover:text-primary transition-colors duration-300">Doctors</a>
+                <a href="chatbot.html" class="font-semibold text-primary border-b-2 border-primary">Symptom Assistant</a>
+            </nav>
+
+            <div class="flex items-center space-x-4" id="auth-buttons">
+                <button class="px-4 py-2 border-2 border-secondary text-secondary font-semibold rounded-full hover:bg-secondary hover:text-white transition-colors duration-300" onclick="openModal('login-modal')">
+                    Login
+                </button>
+                <button class="px-4 py-2 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-colors duration-300 shadow-md hover:shadow-lg" onclick="openModal('register-modal')">
+                    Sign Up
+                </button>
+                <div class="hidden" id="user-menu">
+                    <button class="px-4 py-2 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-colors duration-300">
+                        <span class="user-name">User</span>
+                    </button>
+                    <button class="px-4 py-2 border-2 border-secondary text-secondary font-semibold rounded-full hover:bg-secondary hover:text-white transition-colors duration-300 ml-2" onclick="logout()">
+                        Logout
+                    </button>
+                </div>
+                <button class="md:hidden text-secondary" id="mobile-menu-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-16">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Chat Container -->
+                <div class="lg:w-2/3">
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <!-- Chat Header -->
+                        <div class="bg-gradient-to-r from-primary to-primary-dark p-6">
+                            <div class="flex items-center">
+                                <div class="bg-white p-2 rounded-full mr-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 极速快310h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2极速快3h-5l-5 5v-5z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-bold text-white font-orbitron">AI Symptom Assistant</h2>
+                                    <p class="text-primary-light">Ask about your symptoms and get personalized advice</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat Messages -->
+                        <div class="chat-container overflow-y-auto p-4 bg-gray-50" id="chat-messages">
+                            <!-- Welcome Message -->
+                            <div class="flex mb-4 message-entering">
+                                <div class="flex-shrink-0 mr-3">
+                                    <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg shadow-sm max-w-3/4">
+                                    <p class="font-medium text-secondary">Hello! I'm your AI Symptom Assistant.</p>
+                                    <p class="mt-1 text-gray-600">I can help you understand your symptoms and provide general health information. Please describe how you're feeling, and I'll do my best to assist you.</p>
+                                    <p class="mt-2 text-gray-600">Remember, I'm not a substitute for professional medical advice. For serious symptoms, please consult a doctor.</p>
+                                    <div class="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                        <p class="text-sm text-blue-800">🔒 Your conversations are private and secure. We don't store your personal health information.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Typing Indicator -->
+                            <div class="flex mb-4" id="typing-indicator" style="display: none;">
+                                <div class="flex-shrink-0 mr-3">
+                                    <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg shadow-sm">
+                                    <div class="typing-indicator">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Input Area -->
+                        <div class="border-t border-gray-200 p-4 bg-white">
+                            <form id="chat-form" class="flex items-center">
+                                <div class="flex-grow relative">
+                                    <input type="text" id="message-input" placeholder="Describe your symptoms..." class="w-full border border-gray-300 rounded-full py-3 px-5 pr-12 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary">
+                                        <svg xmlns="极速快3http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button type="submit" class="ml-3 bg-primary text-white rounded-full p-3 hover:bg-primary-dark transition-colors shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                    </svg>
+                                </button>
+                            </form>
+                            <p class="text-xs text-gray-500 mt-2 text-center">SwasthR provides health information, not medical advice. Consult a doctor for serious symptoms.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar with Quick Actions -->
+                <div class="lg:w-1/3">
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-gradient-to-r from-secondary to-secondary-dark p-6">
+                            <h3 class="text-xl font-bold text-white font-orbitron">Quick Actions</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <button class="w-full flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                    <div class="bg-primary-light text-primary rounded-lg p-3 mr-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 极速快31 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 极速快31.498a1 1 0 01.684.949V19a2 极速快32 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-left">
+                                        <h4 class="font-semibold text-secondary">Emergency Contacts</h4>
+                                        <p class="text-sm text-gray-600">Quick access to emergency services</p>
+                                    </div>
+                                </button>
+                                
+                                <button class="w-full flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                    <div class="bg-primary-light text-primary rounded-lg p-3 mr-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2极速快3h-2M9 5a2 2 0 002 2h2a2 2 极速快30 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-left">
+                                        <h4 class="font-semibold text-secondary">View Medicine Cabinet</h4>
+                                        <p class="text-sm text-gray-600">Check your current medications</p>
+                                    </div>
+                                </button>
+                                
+                                <button class="w-full flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                    <div class="bg-primary-light text-primary rounded-lg p-3 mr-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="current极速快3Color">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 极速快30 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-left">
+                                        <h4 class="font-semibold text-secondary">Find Nearby Doctors</h4>
+                                        <p class="text-sm text-gray-600">Locate healthcare providers</p>
+                                    </div>
+                                </button>
+                            </div>
+                            
+                            <div class="mt-8">
+                                <h4 class="font-semibold text-secondary mb-3">Common Symptom Guides</h4>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button class="text-sm bg-gray-100 hover:bg-gray-200 text-secondary py-2 px-3 rounded-lg transition-colors" data-symptom="headache">
+                                        Headache
+                                    </button>
+                                    <button class="text-sm bg-gray-100 hover:bg极速快3-gray-200 text-secondary py-2 px-3 rounded-lg transition-colors" data-symptom="fever">
+                                        Fever
+                                    </button>
+                                    <button class="text-sm bg-gray-100 hover:bg-gray-200 text-secondary py-2 px-3 rounded-lg transition-colors" data-symptom="cough">
+                                        Cough
+                                    </button>
+                                    <button class="text-sm bg-gray-100 hover:bg-gray-200 text-secondary py-2 px-3 rounded-lg transition-colors" data-symptom="nausea">
+                                        Nausea
+                                    </button>
+                                    <button class="text-sm bg-gray-100 hover:bg-gray-200 text-secondary py-2 px-3 rounded-lg transition-colors" data-symptom="fatigue">
+                                        Fatigue
+                                    </button>
+                                    <button class="text-sm bg-gray-100 hover:bg-gray-200 text-secondary py-2 px-3 rounded-lg transition-colors" data-symptom="rash">
+                                        Rash
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-secondary-dark text-white py-8">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                    <img src="https://i.ibb.co/NgsgXB8d/Chat-GPT-Image-Jun-13-2025-03-48-11-PM.png" alt="SwasthR Logo" class="h-8 w-8 object-contain">
+                    <span class="text-xl font-bold">
+                        <span class="logo-text font-orbitron">SwasthR</span>
+                    </span>
+                </div>
+                
+                <div class="text-gray-300 text-sm">
+                    <p>© 2025 SwasthR. All rights reserved.</p>
+                </div>
+                
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622极速快3h3.128v-2.671c0-3.1 1.893-4.788 4.659-极速快34.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3极速快3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 极速快34-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5极速快3v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.极速快375.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h极速快3-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Chat functionality
+        document.getElementById('chat-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (message) {
+                // Add user message to chat
+                addMessage(message, 'user');
+                input.value = '';
+                
+                // Show typing indicator
+                const typingIndicator = document.getElementById('typing-indicator');
+                typingIndicator.style.display = 'flex';
+                
+                // Scroll to bottom
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Call our backend API endpoint instead of directly calling Gemini
+                // In the callBackendAPI function, change the fetch URL:
+const response = await fetch('http://localhost:3000/api/chat', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        message: message
+    })
+});
+                callBackendAPI(message);
+            }
+        });
+        
+        // Add message to chat
+        function addMessage(text, sender) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('flex', 'mb-4', 'message-entering');
+            
+            if (sender === 'user') {
+                messageDiv.classList.add('justify-end');
+                messageDiv.innerHTML = `
+                    <div class="bg-primary text-white p-4 rounded-lg shadow-sm max-w-3/4">
+                        <p>${text}</p>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="flex-shrink-0 mr-3">
+                        <div class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm max-w-3/4">
+                        <p>${text}</p>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+        }
+        
+        // Quick action buttons
+        document.querySelectorAll('[data-symptom]').forEach(button => {
+            button.addEventListener('click', function() {
+                const symptom = this.getAttribute('data-symptom');
+                document.getElementById('message-input').value = Tell me about ${symptom};
+            });
+        });
+        
+        // Function to call our backend API
+        async function callBackendAPI(message) {
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Hide typing indicator
+                document.getElementById('typing-indicator').style.display = 'none';
+                
+                if (data.error) {
+                    addMessage(Error: ${data.error}, 'ai');
+                } else if (data.response) {
+                    addMessage(data.response, 'ai');
+                } else {
+                    addMessage("Sorry, I couldn't process your request. Please try again.", 'ai');
+                }
+                
+                // Scroll to bottom after response
+                const chatMessages = document.getElementById('chat-messages');
+                setTimeout(() => {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 100);
+            } catch (error) {
+                // Hide typing indicator
+                document.getElementById('typing-indicator').style.display = 'none';
+                
+                // Add error message
+                addMessage("Sorry, I'm having trouble connecting to the AI service. Please try again later.", 'ai');
+                console.error('Error calling backend API:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwasthR - Smart Medicine Companion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'orbitron': ['Orbitron', 'sans-serif'],
+                        'rajdhani': ['Rajdhani', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            light: '#5ad6d7',
+                            DEFAULT: '#48c9ca',
+                            dark: '#3ab5b6',
+                        },
+                        secondary: {
+                            light: '#082d48',
+                            DEFAULT: '#061f33',
+                            dark: '#041625',
+                        },
+                        accent: {
+                            light: '#ff7e5f',
+                            DEFAULT: '#ff6b4a',
+                            dark: '#e65a3b',
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .logo-text {
+            background: linear-gradient(45deg, #5ad6d7, #48c9ca, #3ab5b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .team-member-image {
+            transition: all 0.3s ease;
+        }
+
+        .team-member-image:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            min-width: 320px;
+            max-width: 90vw;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 2rem;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            outline: none;
+            margin-top: 0.25rem;
+        }
+
+        .form-input:focus {
+            border-color: #48c9ca;
+            box-shadow: 0 0 0 2px #5ad6d7;
+        }
+
+        .btn-primary {
+            background: #48c9ca;
+            color: #fff;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #3ab5b6;
+        }
+    </style>
+</head>
+
+<body class="font-rajdhani bg-gray-50 text-gray-800">
+    <!-- Header -->
+    <header class="fixed w-full bg-white shadow-md z-50">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="flex items-center">
+                    <img src="https://i.ibb.co/NgsgXB8d/Chat-GPT-Image-Jun-13-2025-03-48-11-PM.png" alt="SwasthR Logo"
+                        class="h-10 w-10 object-contain">
+                    <span class="text-2xl font-bold ml-2">
+                        <span class="logo-text font-orbitron">SwasthR</span>
+                    </span>
+                </a>
+            </div>
+
+            <nav class="hidden md:flex space-x-8">
+                <a href="index.html" class="font-semibold text-primary border-b-2 border-primar">Home</a>
+                <a href="scan.html"
+                    class="font-semibold text-secondary hover:text-primary transition-colors duration-300">Medicine
+                    Scan</a>
+                <a href="prescription.html"
+                    class="font-semibold text-secondary hover:text-primary transition-colors duration-300">Prescriptions</a>
+                <a href="connect.html"
+                    class="font-semibold text-secondary hover:text-primary transition-colors duration-300">Doctors</a>
+            </nav>
+
+            <div class="flex items-center space-x-4" id="auth-buttons">
+                <button
+                    class="px-4 py-2 border-2 border-secondary text-secondary font-semibold rounded-full hover:bg-secondary hover:text-white transition-colors duration-300"
+                    onclick="openModal('login-modal')">
+                    Login
+                </button>
+                <button
+                    class="px-4 py-2 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-colors duration-300 shadow-md hover:shadow-lg"
+                    onclick="openModal('register-modal')">
+                    Sign Up
+                </button>
+                <div class="hidden" id="user-menu">
+                    <button
+                        class="px-4 py-2 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-colors duration-300">
+                        <span class="user-name">User</span>
+                    </button>
+                    <button
+                        class="px-4 py-2 border-2 border-secondary text-secondary font-semibold rounded-full hover:bg-secondary hover:text-white transition-colors duration-300 ml-2"
+                        onclick="logout()">
+                        Logout
+                    </button>
+                </div>
+                <button class="md:hidden text-secondary" id="mobile-menu-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="pt-32 pb-20 bg-gradient-to-r from-gray-50 to-gray-100">
+        <div class="container mx-auto px-6 flex flex-col lg:flex-row items-center">
+            <div class="lg:w-1/2 mb-12 lg:mb-0">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-secondary leading-tight mb-6 font-orbitron">
+                    Your Smart <span class="text-primary">Medicine</span> Companion
+                </h1>
+                <p class="text-lg md:text-xl text-gray-600 mb-8">
+                    Scan, search, and stay safe with our intelligent pharmacy assistant that helps you understand your
+                    medications better.
+                </p>
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                    <button
+                        class="px-8 py-3 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        Get Started for Free
+                    </button>
+                    <button
+                        class="px-8 py-3 border-2 border-secondary text-secondary font-semibold rounded-full hover:bg-secondary hover:text-white transition-colors duration-300">
+                        <div class="flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span>Watch Demo</span>
+                        </div>
+                    </button>
+                </div>
+                <div class="mt-8 flex items-center space-x-4">
+                    <div class="flex -space-x-2">
+                        <img src="https://randomuser.me/api/portraits/women/42.jpg"
+                            class="w-10 h-10 rounded-full border-2 border-white" alt="User">
+                        <img src="https://randomuser.me/api/portraits/men/22.jpg"
+                            class="w-10 h-10 rounded-full border-2 border-white" alt="User">
+                        <img src="https://randomuser.me/api/portraits/women/33.jpg"
+                            class="w-10 h-10 rounded-full border-2 border-white" alt="User">
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Trusted by <span
+                                class="font-bold text-secondary">10,000+</span> users</p>
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                                </path>
+                            </svg>
+                            <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                                </path>
+                            </svg>
+                            <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                                </path>
+                            </svg>
+                            <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                                </path>
+                            </svg>
+                            <span class="text-xs text-gray-600 ml-1">4.9/5 (1,200 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:w-1/2 relative">
+                <div class="bg-white p-4 rounded-xl shadow-2xl">
+                    <img src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
+                        class="w-full h-auto rounded-lg" alt="App Screenshot">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 font-orbitron">Key Features</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Designed to make medication management safer and
+                    easier for everyone</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Combined Scan and Search Feature -->
+                <div class="bg-white p-8 rounded-xl shadow-md feature-card">
+                    <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center text-white mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-secondary mb-3">Medicine Scan & Search</h3>
+                    <p class="text-gray-600">Use your camera to scan medicine labels or search our database to instantly
+                        access detailed information and drug interaction alerts.</p>
+                </div>
+
+                <!-- AI Chatbot Feature -->
+                <div class="bg-white p-8 rounded-xl shadow-md feature-card">
+                    <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center text-white mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-secondary mb-3">AI Symptom Assistant</h3>
+                    <p class="text-gray-600">Describe your symptoms to our AI chatbot and receive personalized
+                        medication recommendations and potential interaction warnings.</p>
+                </div>
+
+                <!-- Prescription Management -->
+                <div class="bg-white p-8 rounded-xl shadow-md feature-card">
+                    <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center text-white mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-secondary mb-3">Prescription Management</h3>
+                    <p class="text-gray-600">Track your prescriptions, receive alerts for renewals, and get notified
+                        about dosage changes from your healthcare provider.</p>
+                </div>
+
+                <!-- Doctor Connect -->
+                <div class="bg-white p-8 rounded-xl shadow-md feature-card">
+                    <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center text-white mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-secondary mb-3">Connect with Doctors</h3>
+                    <p class="text-gray-600">Find and connect with nearby doctors and clinics, share your medication
+                        history securely, and book appointments.</p>
+                </div>
+
+                <!-- Emergency Alerts -->
+                <div class="bg-white p-8 rounded-xl shadow-md feature-card">
+                    <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center text-white mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-secondary mb-3">Emergency Alerts</h3>
+                    <p class="text-gray-600">Get immediate alerts for dangerous drug interactions and option to notify
+                        your emergency contacts when serious issues are detected.</p>
+                </div>
+
+                <!-- Health Records -->
+                <div class="bg-white p-8 rounded-xl shadow-md feature-card">
+                    <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center text-white mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor"></svg>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-secondary mb-3">Digital Health Records</h3>
+                    <p class="text-gray-600">Maintain a complete digital record of your medications, test results, and
+                        doctor visits in one secure place.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Demo Section -->
+    <section id="demo" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 font-orbitron">Live Demo</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Try out our medicine scanner with sample images</p>
+            </div>
+
+            <div class="flex flex-col lg:flex-row items-center justify-between">
+                <div class="lg:w-1/2 mb-8 lg:mb-0">
+                    <div class="bg-gray-100 p-8 rounded-xl shadow-inner">
+                        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+                            <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                                id="demo-image" class="w-full h-64 object-contain" alt="Medicine sample">
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <button
+                                onclick="changeDemoImage('https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80')"
+                                class="p-2 border border-gray-300 rounded-lg hover:border-primary transition-colors">
+                                <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80"
+                                    class="w-full h-16 object-contain" alt="Medicine 1">
+                            </button>
+                            <button
+                                onclick="changeDemoImage('https://images.unsplash.com/photo-1587854692152-cbe660dbde88?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80')"
+                                class="p-2 border border-gray-300 rounded-lg hover:border-primary transition-colors">
+                                <img src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80"
+                                    class="w-full h-16 object-contain" alt="Medicine 2">
+                            </button>
+                            <button
+                                onclick="changeDemoImage('https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80')"
+                                class="p-2 border border-gray-300 rounded-lg hover:border-primary transition-colors">
+                                <img src="https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80"
+                                    class="w-full h-16 object-contain" alt="Medicine 3">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:w-1/2 lg:pl-12">
+                    <div class="bg-white p-8 rounded-xl shadow-md border-l-4 border-primary">
+                        <h3 class="text-2xl font-semibold text-secondary mb-4">Scan Results</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm text-gray-500">Medicine Name</p>
+                                <p class="font-medium">Paracetamol 500mg</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Dosage</p>
+                                <p class="font-medium">1 tablet every 4-6 hours as needed</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Uses</p>
+                                <p class="font-medium">Pain relief and fever reduction</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Drug Interactions</p>
+                                <p class="font-medium text-green-600">No conflicts detected</p>
+                            </div>
+                            <div class="pt-4">
+                                <button
+                                    class="px-6 py-2 bg-primary text-white rounded-full text-sm font-medium hover:bg-primary-dark transition-colors">
+                                    Add to Medicine Cabinet
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 font-orbitron">Our Team</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">A group of passionate students dedicated to improving
+                    healthcare</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Team Member 1 -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                    <div class="h-48 bg-gradient-to-r from-primary to-primary-dark flex items-center justify-center">
+                    <a href="https://ibb.co/KjkTy8Mr"><img src="https://i.ibb.co/JR4DkSfs/me-photo.jpg"
+                            class="h-32 w-32 rounded-full border-4 border-white team-member-image"
+                            alt="Diyasha Halder"></a>
+                </div>
+                <div class="p-6 text-center">
+                    <h3 class="text-xl font-semibold text-secondary mb-1">Diyasha Halder</h3>
+                    <p class="text-primary mb-3">Backend Engineer</p>
+                    <p class="text-gray-600 text-sm">Developed the core API and database architecture for medicine
+                        interactions.</p>
+                </div>
+            </div>
+
+            <!-- Team Member 2 -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="h-48 bg-gradient-to-r from-primary to-primary-dark flex items-center justify-center">
+                    <a href="https://ibb.co/Ld86PPbC"><img src="https://i.ibb.co/fd2tSSBC/Debo-photo.jpg"
+                            class="h-32 w-32 rounded-full border-4 border-white team-member-image"
+                            alt="Debosmita Paul"></a>
+                </div>
+                <div class="p-6 text-center">
+                    <h3 class="text-xl font-semibold text-secondary mb-1">Debosmita Paul</h3>
+                    <p class="text-primary mb-3">UI/UX Designer</p>
+                    <p class="text-gray-600 text-sm">Created the intuitive interface and user experience design.</p>
+                </div>
+            </div>
+
+            <!-- Team Member 3 -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="h-48 bg-gradient-to-r from-primary to-primary-dark flex items-center justify-center">
+                    <img src="https://i.ibb.co/Vcr0Rm85/Whats-App-Image-2025-09-18-at-21-14-23-c9518404.jpg"
+                        class="h-32 w-32 rounded-full border-4 border-white team-member-image" alt="Deepmalya Mallick">
+                </div>
+                <div class="p-6 text-center">
+                    <h3 class="text-xl font-semibold text-secondary mb-1">Deepmalya Mallick</h3>
+                    <p class="text-primary mb-3">Frontend Engineer</p>
+                    <p class="text-gray-600 text-sm">Built the responsive web interface and interactive features.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Team Member 4 -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="h-48 bg-gradient-to-r from-primary to-primary-dark flex items-center justify-center">
+                    <a href="https://ibb.co/hFGLDjTx"><img src="https://i.ibb.co/DfBz5yjP/Dishant.jpg"
+                            class="h-32 w-32 rounded-full border-4 border-white team-member-image"
+                            alt="Dishant Kothari"></a>
+                </div>
+                <div class="p-6 text-center">
+                    <h3 class="text-xl font-semibold text-secondary mb-1">Dishant Kothari</h3>
+                    <p class="text-primary mb-3">Full Stack & Deployement</p>
+                    <p class="text-gray-600 text-sm">Handled deployment while ensuring seamless integration of
+                        frontend and backend systems for robust performance</p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+<!-- Testimonials Section -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 font-orbitron">What Our Users Say</h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">Hear from people who have transformed their
+                medication management</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Testimonial 1 -->
+            <div class="bg-white p-8 rounded-xl shadow-md">
+                <div class="flex items-center mb-4">
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                </div>
+                <p class="text-gray-600 mb-6">
+                    "SwasthR has been a lifesaver for managing my mother's multiple medications. The
+                    interaction
+                    alerts have prevented potentially dangerous combinations."
+                </p>
+                <div class="flex items-center">
+                    <img src="https://randomuser.me/api/portraits/women/65.jpg"
+                        class="w-12 h-12 rounded-full mr-4" alt="Priya Sharma">
+                    <div>
+                        <h4 class="font-semibold text-secondary">Priya Sharma</h4>
+                        <p class="text-gray-500 text-sm">Daughter & Caregiver</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial 2 -->
+            <div class="bg-white p-8 rounded-xl shadow-md">
+                <div class="flex items-center mb-4">
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                </div>
+                <p class="text-gray-600 mb-6">
+                    "As a doctor, I recommend SwasthR to all my patients. It helps them understand their
+                    medications
+                    better and improves adherence to treatment plans."
+                </p>
+                <div class="flex items-center">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg"
+                        class="w-12 h-12 rounded-full mr-4" alt="Dr. Rajiv Patel">
+                    <div>
+                        <h4 class="font-semibold text-secondary">Dr. Rajiv Patel</h4>
+                        <p class="text-gray-500 text-sm">General Physician</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial 3 -->
+            <div class="bg-white p-8 rounded-xl shadow-md">
+                <div class="flex items-center mb-4">
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L极2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 极 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 极1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 极 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0极l-2.8 2.034c-.784.极57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                        </path>
+                    </svg>
+                </div>
+                <p class="text-gray-600 mb-6">
+                    "The dose reminders have helped me never miss my diabetes medication. The app explains
+                    everything in simple Hindi which is great for my parents too."
+                </p>
+                <div class="flex items-center">
+                    <img src="https://randomuser.me/api/portraits/women/25.jpg"
+                        class="w-12 h-12 rounded-full mr-4" alt="Ananya Gupta">
+                    <div>
+                        <h4 class="font-semibold text-secondary">Ananya Gupta</h4>
+                        <p class="text-gray-500 text-sm">Diabetes Patient</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 font-orbitron">Frequently Asked Questions
+                </h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Find answers to common questions about SwasthR</p>
+            </div>
+
+            <div class="max-w-3xl mx-auto">
+                <!-- FAQ Item 1 -->
+                <div class="mb-4 border-b border-gray-200 pb-4">
+                    <button
+                        class="flex justify-between items-center w-full text-left font-semibold text-secondary focus:outline-none"
+                        onclick="toggleFAQ(this)">
+                        <span>How accurate is the medicine scanning feature?</span>
+                        <svg class="w-5 h-5 text-primary transform transition-transform duration-300" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div class="hidden mt-2 text-gray-600">
+                        Our OCR technology has a 99.5% accuracy rate in identifying medicine labels and prescription
+                        information when used under proper lighting conditions. We continuously update our database to
+                        ensure the most current information is available.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="mb-4 border-b border-gray-200 pb-4">
+                    <button
+                        class="flex justify-between items-center w-full text-left font-semibold text-secondary focus:outline-none"
+                        onclick="toggleFAQ(this)">
+                        <span>Is my health information secure?</span>
+                        <svg class="w-5 h-5 text-primary transform transition-transform duration-300" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div class="hidden mt-2 text-gray-600">
+                        Yes, we use bank-level encryption and comply with HIPAA regulations to protect your health
+                        information. Your data is never sold to third parties, and you have full control over what
+                        information is stored and shared.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="mb-4 border-b border-gray-200 pb-4">
+                    <button
+                        class="flex justify-between items-center w-full text-left font-semibold text-secondary focus:outline-none"
+                        onclick="toggleFAQ(this)">
+                        <span>Can I use this app without internet?</span>
+                        <svg class="w-5 h-5 text-primary transform transition-transform duration-300" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div class="hidden mt-2 text-gray-600">
+                        Basic scanning features work offline for medications already in your cabinet, but drug
+                        interaction checking and accessing new medication information requires an internet connection.
+                        We recommend syncing your data when online to ensure you have the latest safety information.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="mb-4 border-b border-gray-200 pb-4">
+                    <button
+                        class="flex justify-between items-center w-full text-left font-semibold text-secondary focus:outline-none"
+                        onclick="toggleFAQ(this)">
+                        <span>Is this app free to use?</span>
+                        <svg class="w-5 h-5 text-primary transform transition-transform duration-300" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div class="hidden mt-2 text-gray-600">
+                        We offer a free tier with basic features including medication scanning, basic information, and
+                        limited reminders. Our premium plans unlock advanced features like unlimited reminders, family
+                        sharing, detailed interaction reports, and priority support.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 5 -->
+                <div class="mb-4 border-b border-gray-200 pb-4">
+                    <button
+                        class="flex justify-between items-center w-full text-left font-semibold text-secondary focus:outline-none"
+                        onclick="toggleFAQ(this)">
+                        <span>How does the drug interaction checker work?</span>
+                        <svg class="w-5 h-5 text-primary transform transition-transform duration-300" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div class="hidden mt-2 text-gray-600">
+                        Our system cross-references your medication list with the latest clinical databases to identify
+                        potential interactions. We categorize them by severity (major, moderate, minor) and provide
+                        plain-language explanations of the risks and recommended actions.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 6 -->
+                <div class="mb-4 border-b border-gray-200 pb-4">
+                    <button
+                        class="flex justify-between items-center w-full text-left font-semibold text-secondary focus:outline-none"
+                        onclick="toggleFAQ(this)">
+                        <span>Can I share my medication list with my doctor?</span>
+                        <svg class="w-5 h-5 text-primary transform transition-transform duration-300" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div class="hidden mt-2 text-gray-600">
+                        Yes, with premium plans you can generate and share secure reports with your healthcare
+                        providers. These include your complete medication list, dosages, schedules, and any detected
+                        interactions or concerns.
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center">
+                <p class="text-gray-600 mb-6">Still have questions? We're here to help!</p>
+                <button
+                    class="px-8 py-3 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-colors duration-300 shadow-lg hover:shadow-xl">
+                    Contact Support
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-secondary to-secondary-dark">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6 font-orbitron">Ready to Take Control of Your
+                Medications?</h2>
+            <p class="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">Download SwasthR today and experience safer, smarter
+                medication management.</p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <button
+                    class="px-8 py-3 bg-white text-secondary font-semibold rounded-full hover:bg-gray-100 transition-colors duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"></button>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <span>App Store</span>
+                </button>
+                <button
+                    class="px-8 py-3 bg-white text-secondary font-semibold rounded-full hover:bg-gray-100 transition-colors duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>Google Play</span>
+                </button>
+                <button
+                    class="px-8 py-3 border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-secondary transition-colors duration-300">
+                    Web Version
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-secondary-dark text-white py-12">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-8 md:mb-0">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="https://i.ibb.co/NgsgXB8d/Chat-GPT-Image-Jun-13-2025-03-48-11-PM.png"
+                            alt="SwasthR Logo" class="h-10 w-10 object-contain">
+                        <span class="text-2xl font-bold">
+                            <span class="logo-text font-orbitron">SwasthR</span>
+                        </span>
+                    </div>
+                    <p class="text-gray-300 max-w-xs">Your smart medicine companion for safer medication management.</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Product</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#features"
+                                    class="text-gray-300 hover:text-white transition-colors">Features</a></li>
+                            <li><a href="#demo" class="text-gray-300 hover:text-white transition-colors">Live Demo</a>
+                            </li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Download</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Updates</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Company</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#about" class="text-gray-300 hover:text-white transition-colors">About</a></li>
+                            <li><a href="#team" class="text-gray-300 hover:text-white transition-colors">Our Team</a>
+                            </li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Careers</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Contact</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Resources</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Blog</a></li>
+                            <li><a href="#faq" class="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Tutorials</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">API</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2025 SwasthR. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors"></a>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                    </svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('login-modal')">&times;</span>
+            <h2 class="text-2xl font-bold text-secondary mb-4">Login to SwasthR</h2>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label for="login-email" class="block text-sm font-medium text-secondary mb-2">Email</label>
+                    <input type="email" id="login-email" name="email" class="form-input" required>
+                </div>
+                <div class="mb-6">
+                    <label for="login-password" class="block text-sm font-medium text-secondary mb-2">Password</label>
+                    <input type="password" id="login-password" name="password" class="form-input" required>
+                </div>
+                <button type="submit" class="btn-primary w-full">Login</button>
+                <div id="login-message" class="mt-4 text-center text-red-500"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('register-modal')">&times;</span>
+            <h2 class="text-2xl font-bold text-secondary mb-4">Create Account</h2>
+            <form id="register-form">
+                <div class="mb-4">
+                    <label for="register-name" class="block text-sm font-medium text-secondary mb-2">Full Name</label>
+                    <input type="text" id="register-name" name="name" class="form-input" required>
+                </div>
+                <div class="mb-4">
+                    <label for="register-email" class="block text-sm font-medium text-secondary mb-2">Email</label>
+                    <input type="email" id="register-email" name="email" class="form-input" required>
+                </div>
+                <div class="mb-6">
+                    <label for="register-password"
+                        class="block text-sm font-medium text-secondary mb-2">Password</label>
+                    <input type="password" id="register-password" name="password" class="form-input" required>
+                </div>
+                <button type="submit" class="btn-primary w-full">Create Account</button>
+                <div id="register-message" class="mt-4 text-center text-red-500"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Toggle FAQ items
+        function toggleFAQ(button) {
+            const answer = button.nextElementSibling;
+            const icon = button.querySelector('svg');
+
+            if (answer.classList.contains('hidden')) {
+                // Close all other FAQs first
+                document.querySelectorAll('.faq-item .hidden').forEach(item => {
+                    if (item !== answer) {
+                        item.classList.add('hidden');
+                        const otherIcon = item.previousElementSibling.querySelector('svg');
+                        otherIcon.classList.remove('rotate-180');
+                    }
+                });
+
+                // Open clicked FAQ
+                answer.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                answer.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+            }
+        }
+
+        // Change demo image
+        function changeDemoImage(src) {
+            document.getElementById('demo-image').src = src;
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+
+                    // Update URL without page reload
+                    if (history.pushState) {
+                        history.pushState(null, null, this.getAttribute('href'));
+                    } else {
+                        location.hash = this.getAttribute('href');
+                    }
+                }
+            });
+        });
+
+        // Mobile menu toggle (would be implemented in React)
+        // This is just a placeholder for the functionality
+        const mobileMenuButton = document.querySelector('.md\\:hidden');
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', function () {
+                // This would toggle a mobile menu in a React implementation
+                console.log('Mobile menu toggled - would show/hide menu in React');
+            });
+        }
+
+        // Modal open/close logic
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Simple local "auth" for demo (no backend)
+        function setUser(name) {
+            document.getElementById('auth-buttons').querySelector('button[onclick*="openModal"]').style.display = 'none';
+            document.getElementById('auth-buttons').querySelector('button[onclick*="openModal"]').nextElementSibling.style.display = 'none';
+            document.getElementById('user-menu').classList.remove('hidden');
+            document.querySelector('.user-name').textContent = name;
+        }
+        function logout() {
+            document.getElementById('user-menu').classList.add('hidden');
+            document.getElementById('auth-buttons').querySelector('button[onclick*="openModal"]').style.display = '';
+            document.getElementById('auth-buttons').querySelector('button[onclick*="openModal"]').nextElementSibling.style.display = '';
+        }
+
+        // Login form handler
+        document.getElementById('login-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            // Demo: accept any non-empty credentials
+            if (email && password) {
+                setUser(email.split('@')[0]);
+                closeModal('login-modal');
+                document.getElementById('login-message').textContent = '';
+            } else {
+                document.getElementById('login-message').textContent = 'Invalid credentials!';
+            }
+        });
+
+        // Register form handler
+        document.getElementById('register-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+            // Demo: accept any non-empty credentials
+            if (name && email && password) {
+                setUser(name);
+                closeModal('register-modal');
+                document.getElementById('register-message').textContent = '';
+            } else {
+                document.getElementById('register-message').textContent = 'Please fill all fields!';
+            }
+        });
+
+        // Close modal on outside click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) closeModal(modal.id);
+            });
+        });
+
+        // Hide redundant JS file reference
+        // Remove this line if you add your own main.js
+        const mainJs = document.querySelector('script[src="/js/main.js"]');
+        if (mainJs) mainJs.remove();
+    </script>
+</body>
+
+</html>

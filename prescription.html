@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescription Management | SwasthR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'orbitron': ['Orbitron', 'sans-serif'],
+                        'rajdhani': ['Rajdhani', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            light: '#5ad6d7',
+                            DEFAULT: '#48c9ca',
+                            dark: '#3ab5b6',
+                        },
+                        secondary: {
+                            light: '#082d48',
+                            DEFAULT: '#061f33',
+                            dark: '#041625',
+                        },
+                        accent: {
+                            light: '#ff7e5f',
+                            DEFAULT: '#ff6b4a',
+                            dark: '#e65a3b',
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .logo-text {
+            background: linear-gradient(45deg, #5ad6d7, #48c9ca, #3ab5b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .prescription-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #48c9ca;
+        }
+
+        .prescription-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-high {
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-medium {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .alert-low {
+            border-left: 4px solid #10b981;
+        }
+
+        .status-active {
+            background-color: #ecfdf5;
+            color: #10b981;
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: #f59e0b;
+        }
+
+        .status-expired {
+            background-color: #fee2e2;
+            color: #ef4444;
+        }
+    </style>
+</head>
+
+<body class="font-rajdhani bg-gray-50 text-gray-800">
+    <!-- Header -->
+    <header class="fixed w-full bg-white shadow-md z-50">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="flex items-center">
+                    <img src="https://i.ibb.co/NgsgXB8d/Chat-GPT-Image-Jun-13-2025-03-48-11-PM.png" alt="SwasthR Logo"
+                        class="h-10 w-10 object-contain">
+                    <span class="text-2xl font-bold ml-2">
+                        <span class="logo-text font-orbitron">SwasthR</span>
+                    </span>
+                </a>
+            </div>
+
+            <nav class="hidden md:flex space-x-8">
+                <a href="index.html"
+                    class="font-semibold text-secondary hover:text-primary transition-colors duration-300">Home</a>
+                <a href="scan.html"
+                    class="font-semibold text-secondary hover:text-primary transition-colors duration-300">Medicine
+                    Scan</a>
+                <a href="prescription.html"
+                    class="font-semibold text-primary border-b-2 border-primary">Prescriptions</a>
+                <a href="connect.html"
+                    class="font-semibold text-secondary hover:text-primary transition-colors duration-300">Doctors</a>
+                <a href="chatbot.html" class="font-semibold text-secondary hover:text-primary transition-colors duration-300">Symptom Assistant</a>
+            </nav>
+
+            <div class="flex items-center space-x-4" id="auth-buttons">
+                <button
+                    class="px-4 py-2 border-2 border-secondary text-secondary font-semibold rounded-full hover:bg-secondary hover:text-white transition-colors duration-300"
+                    onclick="openModal('login-modal')">
+                    Login
+                </button>
+                <button
+                    class="px-4 py-2 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-colors duration-300 shadow-md hover:shadow-lg"
+                    onclick="openModal('register-modal')">
+                    Sign Up
+                </button>
+                <div class="hidden" id="user-menu">
+                    <button
+                        class="px-4 py-2 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-colors duration-300">
+                        <span class="user-name">User</span>
+                    </button>
+                    <button
+                        class="px-4 py-2 border-2 border-secondary text-secondary font-semibold rounded-full hover:bg-secondary hover:text-white transition-colors duration-300 ml-2"
+                        onclick="logout()">
+                        Logout
+                    </button>
+                </div>
+                <button class="md:hidden text-secondary" id="mobile-menu-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+    <!-- Main Content -->
+    <main class="pt-24 pb-12">
+        <div class="container mx-auto px-6">
+            <!-- Page Header -->
+            <div class="text-center mb-12">
+                <h1 class="text-3xl md:text-4xl font-bold text-secondary mb-4 font-orbitron">Prescription Management
+                </h1>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Track your prescriptions, receive renewal alerts, and
+                    get dosage change notifications</p>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-primary-light bg-opacity-20 text-primary mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Active Prescriptions</p>
+                            <p class="text-2xl font-semibold text-secondary">5</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-primary-light bg-opacity-20 text-primary mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Renewals Needed</p>
+                            <p class="text-2xl font-semibold text-secondary">2</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-primary-light bg-opacity-20 text-primary mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Dosage Updates</p>
+                            <p class="text-2xl font-semibold text-secondary">1</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-primary-light bg-opacity-20 text-primary mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Active Alerts</p>
+                            <p class="text-2xl font-semibold text-secondary">3</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prescription List -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+                <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-2xl font-semibold text-secondary">Your Prescriptions</h2>
+                    <button
+                        class="px-4 py-2 bg-primary text-white rounded-full text-sm font-medium hover:bg-primary-dark transition-colors flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Add Prescription
+                    </button>
+                </div>
+
+                <div class="divide-y divide-gray-200">
+                    <!-- Prescription Card 1 -->
+                    <div class="prescription-card bg-white p-6 hover:shadow-md">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                            <div class="mb-4 md:mb-0">
+                                <div class="flex items-start">
+                                    <div class="mr-4">
+                                        <div
+                                            class="w-12 h-12 bg-primary-light rounded-lg flex items-center justify-center text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-secondary">Atorvastatin 20mg</h3>
+                                        <p class="text-sm text-gray-600">Cholesterol medication • 30 tablets</p>
+                                        <div class="mt-2 flex flex-wrap gap-2">
+                                            <span class="px-2 py-1 text-xs rounded-full status-active">Active</span>
+                                            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Dr.
+                                                Smith</span>
+                                            <span
+                                                class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Cardiology</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div>
+                                    <p class="text-sm text-gray-500">Last Filled</p>
+                                    <p class="font-medium">Jun 5, 2025</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Refills Left</p>
+                                    <p class="font-medium">2</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Next Refill</p>
+                                    <p class="font-medium">Jul 5, 2025</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prescription Card 2 (with alert) -->
+                    <div class="prescription-card bg-white p-6 hover:shadow-md alert-medium">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                            <div class="mb-4 md:mb-0">
+                                <div class="flex items-start">
+                                    <div class="mr-4">
+                                        <div
+                                            class="w-12 h-12 bg-primary-light rounded-lg flex items-center justify-center text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-secondary">Lisinopril 10mg</h3>
+                                        <p class="text-sm text-gray-600">Blood pressure • 90 tablets</p>
+                                        <div class="mt-2 flex flex-wrap gap-2">
+                                            <span class="px-2 py-1 text-xs rounded-full status-pending">Renewal
+                                                Needed</span>
+                                            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Dr.
+                                                Johnson</span>
+                                            <span
+                                                class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Primary
+                                                Care</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div>
+                                    <p class="text-sm text-gray-500">Last Filled</p>
+                                    <p class="font-medium">May 15, 2025</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Refills Left</p>
+                                    <p class="font-medium">0</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Expires</p>
+                                    <p class="font-medium">Jun 30, 2025</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 bg-yellow-50 p-3 rounded-lg flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 text-yellow-500 mt-0.5 mr-2 flex-shrink-0" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-yellow-800">Renewal required. Contact your doctor to
+                                    authorize more refills.</p>
+                                <p class="text-xs text-yellow-700 mt-1">Last renewal request sent: Jun 10, 2025</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prescription Card 3 (with dosage change) -->
+                    <div class="prescription-card bg-white p-6 hover:shadow-md alert-low">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                            <div class="mb-4 md:mb-0">
+                                <div class="flex items-start">
+                                    <div class="mr-4">
+                                        <div
+                                            class="w-12 h-12 bg-primary-light rounded-lg flex items-center justify-center text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-secondary">Metformin 500mg</h3>
+                                        <p class="text-sm text-gray-600">Diabetes • 60 tablets</p>
+                                        <div class="mt-2 flex flex-wrap gap-2">
+                                            <span class="px-2 py-1 text-xs rounded-full status-active">Active</span>
+                                            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Dr.
+                                                Lee</span>
+                                            <span
+                                                class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Endocrinology</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div>
+                                    <p class="text-sm text-gray-500">Last Filled</p>
+                                    <p class="font-medium">Jun 1, 2025</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Refills Left</p>
+                                    <p class="font-medium">5</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Next Refill</p>
+                                    <p class="font-medium">Jul 1, 2025</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 bg-green-50 p-3 rounded-lg flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-green-800">Dosage updated by your doctor on Jun 8,
+                                    2025</p>
+                                <p class="text-xs text-green-700 mt-1">Changed from 1000mg to 500mg twice daily</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts & Notifications -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-2xl font-semibold text-secondary">Alerts & Notifications</h2>
+                </div>
+
+                <div class="divide-y divide-gray-200">
+                    <!-- Alert 1 -->
+                    <div class="p-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-0.5">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-lg font-semibold text-secondary">Prescription Expiring Soon</h4>
+                                    <span class="text-xs text-gray-500">Today, 9:30 AM</span>
+                                </div>
+                                <p class="text-gray-600 mt-1">Your prescription for <span
+                                        class="font-semibold">Albuterol Inhaler</span> will expire in 7 days. Contact
+                                    your healthcare provider to renew.</p>
+                                <div class="mt-2">
+                                    <button class="text-sm text-primary hover:text-primary-dark font-medium">Contact
+                                        Doctor</button>
+                                    <button
+                                        class="text-sm text-gray-500 hover:text-gray-700 font-medium ml-4">Dismiss</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alert 2 -->
+                    <div class="p-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-0.5">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-lg font-semibold text-secondary">Refill Available</h4>
+                                    <span class="text-xs text-gray-500">Yesterday, 2:15 PM</span>
+                                </div>
+                                <p class="text-gray-600 mt-1">Your prescription for <span
+                                        class="font-semibold">Levothyroxine 50mcg</span> is ready for refill at your
+                                    preferred pharmacy.</p>
+                                <div class="mt-2">
+                                    <button class="text-sm text-primary hover:text-primary-dark font-medium">Request
+                                        Refill</button>
+                                    <button class="text-sm text-gray-500 hover:text-gray-700 font-medium ml-4">Remind Me
+                                        Later</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alert 3 -->
+                    <div class="p-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-0.5">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-lg font-semibold text-secondary">Dosage Confirmed</h4>
+                                    <span class="text-xs text-gray-500">Jun 10, 2025</span>
+                                </div>
+                                <p class="text-gray-600 mt-1">Dr. Patel has confirmed your new dosage for <span
+                                        class="font-semibold">Sertraline</span> from 50mg to 100mg daily.</p>
+                                <div class="mt-2">
+                                    <button class="text-sm text-primary hover:text-primary-dark font-medium">View
+                                        Details</button>
+                                    <button
+                                        class="text-sm text-gray-500 hover:text-gray-700 font-medium ml-4">Dismiss</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button
+                    class="px-6 py-3 bg-secondary text-white font-semibold rounded-full hover:bg-secondary-dark transition-colors duration-300 shadow-lg hover:shadow-xl">
+                    Request Refills
+                </button>
+                <button
+                    class="px-6 py-3 border-2 border-secondary text-secondary font-semibold rounded-full hover:bg-secondary hover:text-white transition-colors duration-300">
+                    Contact Healthcare Provider
+                </button>
+                <button
+                    class="px-6 py-3 border-2 border-primary text-primary font-semibold rounded-full hover:bg-primary hover:text-white transition-colors duration-300">
+                    Notification Settings
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-secondary-dark text-white py-8">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-3">
+                        <img src="https://i.ibb.co/NgsgXB8d/Chat-GPT-Image-Jun-13-2025-03-48-11-PM.png"
+                            alt="SwasthR Logo" class="h-8 w-8 object-contain">
+                        <span class="text-xl font-bold">
+                            <span class="logo-text font-orbitron">SwasthR</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-300">
+                    © 2025 SwasthR. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // In a real app, this would handle prescription management functionality
+        document.querySelectorAll('.prescription-card').forEach(card => {
+            card.addEventListener('click', () => {
+                // Would open prescription details in real app
+                console.log('Prescription clicked - would open details view');
+            });
+        });
+    </script>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('login-modal')">&times;</span>
+            <h2 class="text-2xl font-bold text-secondary mb-4">Login to SwasthR</h2>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label for="login-email" class="block text-sm font-medium text-secondary mb-2">Email</label>
+                    <input type="email" id="login-email" name="email" class="form-input" required>
+                </div>
+                <div class="mb-6">
+                    <label for="login-password" class="block text-sm font-medium text-secondary mb-2">Password</label>
+                    <input type="password" id="login-password" name="password" class="form-input" required>
+                </div>
+                <button type="submit" class="btn-primary w-full">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('register-modal')">&times;</span>
+            <h2 class="text-2xl font-bold text-secondary mb-4">Create Account</h2>
+            <form id="register-form">
+                <div class="mb-4">
+                    <label for="register-name" class="block text-sm font-medium text-secondary mb-2">Full Name</label>
+                    <input type="text" id="register-name" name="name" class="form-input" required>
+                </div>
+                <div class="mb-4">
+                    <label for="register-email" class="block text-sm font-medium text-secondary mb-2">Email</label>
+                    <input type="email" id="register-email" name="email" class="form-input" required>
+                </div>
+                <div class="mb-6">
+                    <label for="register-password"
+                        class="block text-sm font-medium text-secondary mb-2">Password</label>
+                    <input type="password" id="register-password" name="password" class="form-input" required>
+                </div>
+                <button type="submit" class="btn-primary w-full">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/prescription.js"></script>
+</body>
+
+</html>
